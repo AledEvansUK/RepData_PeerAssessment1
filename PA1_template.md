@@ -1,13 +1,5 @@
----
-output: 
-  html_document: 
-    fig_caption: yes
-    keep_md: yes
----
 ##### "Reproducible Research - Peer Assessment 1"
-```{r}
 
-```
 
 ##### author: "AledEvans"; date: "9 June 2016"; output: html_document
 
@@ -15,28 +7,48 @@ output:
 
 #### Settings
 
-```{r settings}
+
+```r
 echo = TRUE # make R code always visable 
 ```
 
 #### Loading and pre-processing the data
 
-```{r data load and pre-process}
+
+```r
 # This code is for loading the data (unzip and read). dplr is loaded is loaded to aid the data analysis including activity data being structured as a tbl data frame.
 
 library(dplyr)
+```
 
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 unzip("activity.zip")
 activityData <- read.csv("activity.csv")
 activityData <- tbl_df(activityData)
-
 ```
 
 
 #### Histogram of total number of steps taken each day
 
-```{r histogram total mean steps}
 
+```r
 # ggplot2 is loaded for plotting the histogram. 
 # The sum of the steps per day is taken. A histogram of this sum of steps is generated. 
 
@@ -47,13 +59,18 @@ stepsByDay <- aggregate(steps ~ date, activityData, sum)
 hist(stepsByDay$steps, breaks = 50, main = paste("Steps each day - Total"), col="purple", xlab="Number of Steps")
 ```
 
+![](PA1_template_files/figure-html/histogram total mean steps-1.png)<!-- -->
+
 
 #### Calculate mean total steps per day 
 
-```{r mean total steps per day}
 
+```r
 mean((stepsByDay$steps), na.rm = TRUE)
+```
 
+```
+## [1] 10766.19
 ```
 
 ##### Mean of the total steps per day is: 10766.19 steps
@@ -61,9 +78,13 @@ mean((stepsByDay$steps), na.rm = TRUE)
 
 #### Calculate median total steps per day 
 
-```{r median total steps per day}
 
+```r
 median((stepsByDay$steps), na.rm = TRUE)
+```
+
+```
+## [1] 10765
 ```
 
 ##### Median of the total steps per day is: 10765 steps
@@ -72,8 +93,8 @@ median((stepsByDay$steps), na.rm = TRUE)
 #### What is the average daily activity pattern?
 Time series plot of the average number of steps taken.
 
-``` {r plot average daily pattern} 
 
+```r
 # Calulate the mean ("average") of the daily steps.
 # Require ggplot2 for plot of data. 
 
@@ -82,16 +103,21 @@ averageSteps <- aggregate(steps ~ interval, activityData , mean)
 library(ggplot2)
 
 plot(averageSteps$interval,averageSteps$steps,type="l", main="Steps by day - Average", xlab="Interval", ylab="Number of steps", col="purple")
-
 ```
+
+![](PA1_template_files/figure-html/plot average daily pattern-1.png)<!-- -->
 
 
 #### The 5-minute interval that, on average, contains the maximum number of steps
 
-```{r interval with max of mean steps}
 
+```r
 averageSteps[which.max(averageSteps$steps), ]
+```
 
+```
+##     interval    steps
+## 104      835 206.1698
 ```
 
 ##### The interval with the the maximum means steps is: 835.
@@ -100,15 +126,20 @@ averageSteps[which.max(averageSteps$steps), ]
 
 #### Imputing missing values
 
-```{r impute missing values}
 
+```r
 # Identify number of missing values
 # table with missing values
 
 missingValues <- is.na(activityData$steps) 
 
 table(missingValues) 
+```
 
+```
+## missingValues
+## FALSE  TRUE 
+## 15264  2304
 ```
 
 ##### There are 2304 missing values.
@@ -116,7 +147,8 @@ table(missingValues)
 
 #### fill missing data mean value
 
-```{r fill missing values}
+
+```r
 # The analysis uses a function replaced the missing ("NA") values with the mean/ average steps for the interval.
 
 fillValues <- function(steps, interval) {
@@ -127,14 +159,13 @@ fillValues <- function(steps, interval) {
 }
 fillData <- activityData
 fillData$steps <- mapply(fillValues, fillData$steps, fillData$interval)
- 
 ```
 
 
 #### Histogram of filled data set
 
-```{r histogram of filled data}
 
+```r
 # Take the mean of the the total steps from teh the filled data.
 # Generate histogram of using ggplot2.
 
@@ -145,21 +176,29 @@ library(ggplot2)
 hist(totalSteps, breaks = 50, col="purple", xlab="total number of steps each day", ylab = "steps")
 ```
 
+![](PA1_template_files/figure-html/histogram of filled data-1.png)<!-- -->
+
 
 #### Mean of total steps of filled/ imputed data
 
-```{r mean total steps}
 
+```r
 mean(totalSteps)
+```
 
+```
+## [1] 10766.19
 ```
 
 ##### The mean of the imputed data (i.e. totalSteps) is the total steps is 10766.19.
 
-```{r median of total steps}
 
+```r
 median(totalSteps)
+```
 
+```
+## [1] 10766.19
 ```
 
 ##### The median of the imputed data (i.e. totalSteps) is 10766.19.
@@ -167,7 +206,8 @@ median(totalSteps)
 
 #### Are there differences in activity patterns between weekdays and weekends?
 
-```{r cliassifay days as weekday or weekend}
+
+```r
 weekdays <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
 fillData$dow = as.factor(ifelse(is.element(weekdays(as.Date(fillData$date)), weekdays), "Weekdays", "Weekends"))
 
@@ -175,8 +215,9 @@ stepsByInterval <- aggregate(steps ~ interval + dow, fillData, mean)
 
 library(lattice)
 xyplot(stepsByInterval$steps ~ stepsByInterval$interval|stepsByInterval$dow, main="Steps by day - Average",xlab="Interval", ylab="Steps", layout=c(1,2), type="l", col="purple")
-
 ```
+
+![](PA1_template_files/figure-html/cliassifay days as weekday or weekend-1.png)<!-- -->
 
 ##### The plots shows:
 ##### 1 - on weekdays the step activity occurs throughout the day. There is a larger peak in the weekday morning period (intervals 800 to around 950) although larger than other peaks from other day-parts, it not a considerable difference.
